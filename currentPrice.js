@@ -1,3 +1,4 @@
+function currentPrice(elementId) {
 // URL for data endpoint
 var url = 'data.php?';
 
@@ -30,8 +31,8 @@ var gaugeOptions = {
     yAxis: {
         stops: [
             [0.2, '#55BF3B'], // green
-            [0.4, '#DDDF0D'], // yellow, 8c
-            [0.6, '#DF5353'] // red, 12c
+            [0.5, '#DDDF0D'], // yellow, 8c
+            [0.7, '#DF5353'] // red, 12c
         ],
         lineWidth: 0,
         minorTickInterval: null,
@@ -56,7 +57,7 @@ var gaugeOptions = {
 };
 
 // Current price
-var chartCurrent = Highcharts.chart('current-price', Highcharts.merge(gaugeOptions, {
+var chartCurrent = Highcharts.chart(elementId, Highcharts.merge(gaugeOptions, {
     yAxis: {
         min: 0,
         max: 20,
@@ -96,3 +97,4 @@ function getCurrentPrice() {
   $.get(url + 'currentPrice', function(data) {updateCurrentPrice(parseFloat(data));});
 }
 setTimeout( getCurrentPrice, 1000);
+};
