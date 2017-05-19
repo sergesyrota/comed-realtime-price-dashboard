@@ -1,0 +1,131 @@
+<html>
+<h2>Hello, world!</h2>
+<head>
+<script src="https://code.highcharts.com/5.0.11/highcharts.js"></script>
+<script src="https://code.highcharts.com/5.0.11/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/5.0.11/modules/solid-gauge.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+</head>
+<body>
+    <div style="width: 600px; height: 400px; margin: 0 auto">
+        <div id="container-speed" style="width: 300px; height: 200px; float: left"></div>
+    </div>
+
+<script>
+var gaugeOptions = {
+
+    chart: {
+        type: 'solidgauge'
+    },
+
+    title: null,
+
+    pane: {
+        center: ['50%', '85%'],
+        size: '140%',
+        startAngle: -90,
+        endAngle: 90,
+        background: {
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+            innerRadius: '60%',
+            outerRadius: '100%',
+            shape: 'arc'
+        }
+    },
+
+    tooltip: {
+        enabled: false
+    },
+
+    // the value axis
+    yAxis: {
+        stops: [
+            [0.1, '#55BF3B'], // green
+            [0.5, '#DDDF0D'], // yellow
+            [0.9, '#DF5353'] // red
+        ],
+        lineWidth: 0,
+        minorTickInterval: null,
+        tickAmount: 2,
+        title: {
+            y: -70
+        },
+        labels: {
+            y: 16
+        }
+    },
+
+    plotOptions: {
+        solidgauge: {
+            dataLabels: {
+                y: 5,
+                borderWidth: 0,
+                useHTML: true
+            }
+        }
+    }
+};
+
+// The speed gauge
+var chartSpeed = Highcharts.chart('container-speed', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: -2,
+        max: 20,
+        title: {
+            text: 'Electric cost'
+        }
+    },
+
+    credits: {
+        enabled: false
+    },
+
+    series: [{
+        name: 'Speed',
+        data: [-2],
+        dataLabels: {
+            format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                   '<span style="font-size:12px;color:silver">c/kWh</span></div>'
+        },
+        tooltip: {
+            valueSuffix: ' c/kWh'
+        }
+    }]
+
+}));
+
+// Bring life to the dials
+setInterval(function () {
+    // Speed
+    var point,
+        newVal,
+        inc;
+
+    if (chartSpeed) {
+        point = chartSpeed.series[0].points[0];
+        inc = Math.round((Math.random() - 0.5) * 10);
+        newVal = point.y + inc;
+
+        if (newVal < -2 || newVal > 20) {
+            newVal = point.y - inc;
+        }
+
+        point.update(newVal);
+    }
+}, 20000);
+function update5MinutePrice(data) {
+  var point = chartSpeed.series[0].points[0];
+  console.log(point.update(data[0].price));
+}
+function getCurrentPrice() {
+  // Current price is current hour's average of all available 5-minute intervals
+  // +3.6c for distribution, and 2.83c (need to confirm) for capacity charge. 7.1c before switch = 4.27
+  data = '[{"millisUTC":"1494937800000","price":"2.8"},{"millisUTC":"1494937500000","price":"2.8"},{"millisUTC":"1494937200000","price":"2.8"},{"millisUTC":"1494936900000","price":"2.8"},{"millisUTC":"1494936600000","price":"2.8"},{"millisUTC":"1494936300000","price":"2.7"},{"millisUTC":"1494936000000","price":"2.7"},{"millisUTC":"1494935700000","price":"2.7"},{"millisUTC":"1494935400000","price":"2.7"},{"millisUTC":"1494935100000","price":"2.7"},{"millisUTC":"1494934800000","price":"2.7"},{"millisUTC":"1494934500000","price":"2.6"},{"millisUTC":"1494934200000","price":"2.6"},{"millisUTC":"1494933900000","price":"2.7"},{"millisUTC":"1494933600000","price":"2.6"},{"millisUTC":"1494933300000","price":"2.7"},{"millisUTC":"1494933000000","price":"2.7"},{"millisUTC":"1494932700000","price":"2.4"},{"millisUTC":"1494932400000","price":"2.6"},{"millisUTC":"1494932100000","price":"2.6"},{"millisUTC":"1494931800000","price":"2.4"},{"millisUTC":"1494931500000","price":"2.4"},{"millisUTC":"1494931200000","price":"2.3"},{"millisUTC":"1494930900000","price":"2.2"},{"millisUTC":"1494930600000","price":"2.5"},{"millisUTC":"1494930300000","price":"2.5"},{"millisUTC":"1494930000000","price":"2.4"},{"millisUTC":"1494929700000","price":"2.3"},{"millisUTC":"1494929400000","price":"0.7"},{"millisUTC":"1494929100000","price":"0.7"},{"millisUTC":"1494928800000","price":"2.2"},{"millisUTC":"1494928500000","price":"2.1"},{"millisUTC":"1494928200000","price":"0.2"},{"millisUTC":"1494927900000","price":"1.9"},{"millisUTC":"1494927600000","price":"1.9"},{"millisUTC":"1494927300000","price":"1.2"},{"millisUTC":"1494927000000","price":"1.2"},{"millisUTC":"1494926700000","price":"1.3"},{"millisUTC":"1494926400000","price":"2.0"},{"millisUTC":"1494926100000","price":"2.0"},{"millisUTC":"1494925800000","price":"2.2"},{"millisUTC":"1494925500000","price":"2.2"},{"millisUTC":"1494925200000","price":"2.0"},{"millisUTC":"1494924900000","price":"2.1"},{"millisUTC":"1494924600000","price":"1.2"},{"millisUTC":"1494924300000","price":"1.2"},{"millisUTC":"1494924000000","price":"2.0"},{"millisUTC":"1494923700000","price":"2.0"},{"millisUTC":"1494923400000","price":"-0.2"},{"millisUTC":"1494923100000","price":"0.9"},{"millisUTC":"1494922800000","price":"2.0"},{"millisUTC":"1494922500000","price":"2.0"},{"millisUTC":"1494922200000","price":"2.0"},{"millisUTC":"1494921900000","price":"2.0"},{"millisUTC":"1494921600000","price":"0.8"},{"millisUTC":"1494921300000","price":"1.7"},{"millisUTC":"1494921000000","price":"1.7"},{"millisUTC":"1494920700000","price":"2.0"},{"millisUTC":"1494920400000","price":"2.0"},{"millisUTC":"1494920100000","price":"-0.2"},{"millisUTC":"1494919800000","price":"-0.2"},{"millisUTC":"1494919500000","price":"0.1"},{"millisUTC":"1494919200000","price":"0.1"},{"millisUTC":"1494918900000","price":"1.9"},{"millisUTC":"1494918600000","price":"1.9"},{"millisUTC":"1494918300000","price":"1.6"},{"millisUTC":"1494918000000","price":"1.6"},{"millisUTC":"1494917700000","price":"1.7"},{"millisUTC":"1494917400000","price":"1.3"},{"millisUTC":"1494917100000","price":"1.7"},{"millisUTC":"1494916800000","price":"1.9"},{"millisUTC":"1494916500000","price":"1.9"},{"millisUTC":"1494916200000","price":"2.0"},{"millisUTC":"1494915900000","price":"2.0"},{"millisUTC":"1494915600000","price":"2.0"},{"millisUTC":"1494915300000","price":"2.0"},{"millisUTC":"1494915000000","price":"2.0"},{"millisUTC":"1494914700000","price":"2.1"},{"millisUTC":"1494914400000","price":"2.1"},{"millisUTC":"1494914100000","price":"2.0"},{"millisUTC":"1494913800000","price":"2.0"},{"millisUTC":"1494913500000","price":"2.0"},{"millisUTC":"1494913200000","price":"2.2"},{"millisUTC":"1494912900000","price":"2.2"},{"millisUTC":"1494912600000","price":"2.2"},{"millisUTC":"1494912300000","price":"2.2"},{"millisUTC":"1494912000000","price":"2.2"},{"millisUTC":"1494911700000","price":"2.2"},{"millisUTC":"1494911400000","price":"2.1"},{"millisUTC":"1494911100000","price":"2.2"},{"millisUTC":"1494910800000","price":"2.1"},{"millisUTC":"1494910500000","price":"2.1"},{"millisUTC":"1494910200000","price":"2.2"},{"millisUTC":"1494909900000","price":"2.2"},{"millisUTC":"1494909600000","price":"2.3"},{"millisUTC":"1494909300000","price":"2.3"},{"millisUTC":"1494909000000","price":"2.3"},{"millisUTC":"1494908700000","price":"2.3"},{"millisUTC":"1494908400000","price":"2.3"},{"millisUTC":"1494908100000","price":"2.3"},{"millisUTC":"1494907800000","price":"2.2"},{"millisUTC":"1494907500000","price":"2.2"},{"millisUTC":"1494907200000","price":"2.4"},{"millisUTC":"1494906900000","price":"2.4"},{"millisUTC":"1494906600000","price":"2.4"},{"millisUTC":"1494906300000","price":"2.5"},{"millisUTC":"1494906000000","price":"2.2"},{"millisUTC":"1494905700000","price":"2.1"},{"millisUTC":"1494905400000","price":"2.4"},{"millisUTC":"1494905100000","price":"2.5"},{"millisUTC":"1494904800000","price":"2.5"},{"millisUTC":"1494904500000","price":"2.6"},{"millisUTC":"1494904200000","price":"2.6"},{"millisUTC":"1494903900000","price":"2.6"},{"millisUTC":"1494903600000","price":"2.6"},{"millisUTC":"1494903300000","price":"2.6"},{"millisUTC":"1494903000000","price":"2.7"},{"millisUTC":"1494902700000","price":"2.7"},{"millisUTC":"1494902400000","price":"2.9"},{"millisUTC":"1494902100000","price":"2.9"},{"millisUTC":"1494901800000","price":"3.1"},{"millisUTC":"1494901500000","price":"3.3"},{"millisUTC":"1494901200000","price":"3.4"},{"millisUTC":"1494900900000","price":"2.7"},{"millisUTC":"1494900600000","price":"3.0"},{"millisUTC":"1494900300000","price":"3.0"},{"millisUTC":"1494900000000","price":"2.8"},{"millisUTC":"1494899700000","price":"2.6"},{"millisUTC":"1494899400000","price":"2.6"},{"millisUTC":"1494899100000","price":"2.6"},{"millisUTC":"1494898800000","price":"2.9"},{"millisUTC":"1494898500000","price":"5.9"},{"millisUTC":"1494898200000","price":"5.9"},{"millisUTC":"1494897900000","price":"4.2"},{"millisUTC":"1494897600000","price":"4.2"},{"millisUTC":"1494897300000","price":"3.7"},{"millisUTC":"1494897000000","price":"3.7"},{"millisUTC":"1494896700000","price":"3.4"},{"millisUTC":"1494896400000","price":"5.9"},{"millisUTC":"1494896100000","price":"5.9"},{"millisUTC":"1494895800000","price":"5.9"},{"millisUTC":"1494895500000","price":"3.2"},{"millisUTC":"1494895200000","price":"3.4"},{"millisUTC":"1494894900000","price":"3.4"},{"millisUTC":"1494894600000","price":"3.4"},{"millisUTC":"1494894300000","price":"3.2"},{"millisUTC":"1494894000000","price":"3.3"},{"millisUTC":"1494893700000","price":"3.3"},{"millisUTC":"1494893400000","price":"3.4"},{"millisUTC":"1494893100000","price":"3.4"},{"millisUTC":"1494892800000","price":"3.2"},{"millisUTC":"1494892500000","price":"3.2"},{"millisUTC":"1494892200000","price":"3.3"},{"millisUTC":"1494891900000","price":"3.4"},{"millisUTC":"1494891600000","price":"3.5"},{"millisUTC":"1494891300000","price":"3.5"},{"millisUTC":"1494891000000","price":"3.5"},{"millisUTC":"1494890700000","price":"3.5"},{"millisUTC":"1494890400000","price":"3.5"},{"millisUTC":"1494890100000","price":"3.5"},{"millisUTC":"1494889800000","price":"3.3"},{"millisUTC":"1494889500000","price":"3.3"},{"millisUTC":"1494889200000","price":"3.3"},{"millisUTC":"1494888900000","price":"3.7"},{"millisUTC":"1494888600000","price":"3.7"},{"millisUTC":"1494888300000","price":"3.7"},{"millisUTC":"1494888000000","price":"3.7"},{"millisUTC":"1494887700000","price":"3.7"},{"millisUTC":"1494887400000","price":"5.7"},{"millisUTC":"1494887100000","price":"3.5"},{"millisUTC":"1494886800000","price":"3.5"},{"millisUTC":"1494886500000","price":"3.5"},{"millisUTC":"1494886200000","price":"3.4"},{"millisUTC":"1494885900000","price":"3.5"},{"millisUTC":"1494885600000","price":"3.7"},{"millisUTC":"1494885300000","price":"3.4"},{"millisUTC":"1494885000000","price":"3.5"},{"millisUTC":"1494884700000","price":"3.3"},{"millisUTC":"1494884400000","price":"3.5"},{"millisUTC":"1494884100000","price":"3.5"},{"millisUTC":"1494883800000","price":"3.4"},{"millisUTC":"1494883500000","price":"7.2"},{"millisUTC":"1494883200000","price":"7.2"},{"millisUTC":"1494882900000","price":"11.1"},{"millisUTC":"1494882600000","price":"11.1"},{"millisUTC":"1494882300000","price":"14.5"},{"millisUTC":"1494882000000","price":"14.5"},{"millisUTC":"1494881700000","price":"14.5"},{"millisUTC":"1494881400000","price":"16.2"},{"millisUTC":"1494881100000","price":"15.2"},{"millisUTC":"1494880800000","price":"15.2"},{"millisUTC":"1494880500000","price":"15.2"},{"millisUTC":"1494880200000","price":"5.2"},{"millisUTC":"1494879900000","price":"5.1"},{"millisUTC":"1494879600000","price":"5.1"},{"millisUTC":"1494879300000","price":"5.6"},{"millisUTC":"1494879000000","price":"5.6"},{"millisUTC":"1494878700000","price":"4.6"},{"millisUTC":"1494878400000","price":"6.0"},{"millisUTC":"1494878100000","price":"4.2"},{"millisUTC":"1494877800000","price":"4.2"},{"millisUTC":"1494877500000","price":"4.2"},{"millisUTC":"1494877200000","price":"4.0"},{"millisUTC":"1494876900000","price":"4.3"},{"millisUTC":"1494876600000","price":"7.5"},{"millisUTC":"1494876300000","price":"4.0"},{"millisUTC":"1494876000000","price":"3.4"},{"millisUTC":"1494875700000","price":"3.6"},{"millisUTC":"1494875400000","price":"3.6"},{"millisUTC":"1494875100000","price":"8.0"},{"millisUTC":"1494874800000","price":"7.8"},{"millisUTC":"1494874500000","price":"21.3"},{"millisUTC":"1494874200000","price":"21.3"},{"millisUTC":"1494873900000","price":"21.3"},{"millisUTC":"1494873600000","price":"21.3"},{"millisUTC":"1494873300000","price":"21.3"},{"millisUTC":"1494873000000","price":"5.3"},{"millisUTC":"1494872700000","price":"5.3"},{"millisUTC":"1494872400000","price":"5.3"},{"millisUTC":"1494872100000","price":"5.3"},{"millisUTC":"1494871800000","price":"6.5"},{"millisUTC":"1494871500000","price":"6.5"},{"millisUTC":"1494871200000","price":"6.5"},{"millisUTC":"1494870900000","price":"6.5"},{"millisUTC":"1494870600000","price":"5.2"},{"millisUTC":"1494870300000","price":"5.6"},{"millisUTC":"1494870000000","price":"3.9"},{"millisUTC":"1494869700000","price":"3.9"},{"millisUTC":"1494869400000","price":"5.3"},{"millisUTC":"1494869100000","price":"4.2"},{"millisUTC":"1494868800000","price":"3.0"},{"millisUTC":"1494868500000","price":"3.2"},{"millisUTC":"1494868200000","price":"3.2"},{"millisUTC":"1494867900000","price":"3.2"},{"millisUTC":"1494867600000","price":"3.2"},{"millisUTC":"1494867300000","price":"3.1"},{"millisUTC":"1494867000000","price":"3.2"},{"millisUTC":"1494866700000","price":"3.1"},{"millisUTC":"1494866400000","price":"3.0"},{"millisUTC":"1494866100000","price":"3.1"},{"millisUTC":"1494865800000","price":"3.0"},{"millisUTC":"1494865500000","price":"3.0"},{"millisUTC":"1494865200000","price":"3.0"},{"millisUTC":"1494864900000","price":"3.0"},{"millisUTC":"1494864600000","price":"3.0"},{"millisUTC":"1494864300000","price":"3.0"},{"millisUTC":"1494864000000","price":"2.7"},{"millisUTC":"1494863700000","price":"2.8"},{"millisUTC":"1494863400000","price":"5.0"},{"millisUTC":"1494863100000","price":"9.1"},{"millisUTC":"1494862800000","price":"9.0"},{"millisUTC":"1494862500000","price":"5.5"},{"millisUTC":"1494862200000","price":"3.3"},{"millisUTC":"1494861900000","price":"3.5"},{"millisUTC":"1494861600000","price":"8.6"},{"millisUTC":"1494861300000","price":"9.0"},{"millisUTC":"1494861000000","price":"3.1"},{"millisUTC":"1494860700000","price":"2.7"},{"millisUTC":"1494860400000","price":"2.7"},{"millisUTC":"1494860100000","price":"8.8"},{"millisUTC":"1494859800000","price":"8.5"},{"millisUTC":"1494859500000","price":"9.0"},{"millisUTC":"1494859200000","price":"8.1"},{"millisUTC":"1494858900000","price":"8.0"},{"millisUTC":"1494858600000","price":"10.1"},{"millisUTC":"1494858300000","price":"10.1"},{"millisUTC":"1494858000000","price":"3.7"},{"millisUTC":"1494857700000","price":"3.7"},{"millisUTC":"1494857400000","price":"9.4"},{"millisUTC":"1494857100000","price":"10.1"},{"millisUTC":"1494856800000","price":"9.3"},{"millisUTC":"1494856500000","price":"3.5"},{"millisUTC":"1494856200000","price":"3.2"},{"millisUTC":"1494855900000","price":"3.1"},{"millisUTC":"1494855600000","price":"8.2"},{"millisUTC":"1494855300000","price":"8.2"},{"millisUTC":"1494855000000","price":"8.0"},{"millisUTC":"1494854700000","price":"2.2"},{"millisUTC":"1494854400000","price":"2.2"},{"millisUTC":"1494854100000","price":"8.1"},{"millisUTC":"1494853800000","price":"2.2"},{"millisUTC":"1494853500000","price":"2.2"},{"millisUTC":"1494853200000","price":"3.0"},{"millisUTC":"1494852900000","price":"3.0"},{"millisUTC":"1494852600000","price":"3.1"},{"millisUTC":"1494852300000","price":"3.0"},{"millisUTC":"1494852000000","price":"3.0"}]';
+  url = 'data.php';
+  $.get(url, function(data) {console.log(data)});
+}
+update5MinutePrice([{"millisUTC":"1494938100000","price":2.8}]);
+</script>
+</body>
+</html>
