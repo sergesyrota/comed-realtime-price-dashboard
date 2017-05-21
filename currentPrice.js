@@ -1,6 +1,6 @@
 function currentPrice(elementId) {
 // URL for data endpoint
-var url = 'data.php?';
+var url = 'data.php?currentPrice';
 
 var gaugeOptions = {
 
@@ -30,7 +30,7 @@ var gaugeOptions = {
     // the value axis
     yAxis: {
         stops: [
-            [0.2, '#55BF3B'], // green
+            [0.3, '#55BF3B'], // green
             [0.5, '#DDDF0D'], // yellow, 8c
             [0.7, '#DF5353'] // red, 12c
         ],
@@ -94,7 +94,7 @@ function updateCurrentPrice(price) {
     setTimeout(getCurrentPrice, 300000);
 }
 function getCurrentPrice() {
-  $.get(url + 'currentPrice', function(data) {updateCurrentPrice(parseFloat(data));});
+  $.get(url, function(data) {updateCurrentPrice(parseFloat(data));});
 }
 setTimeout( getCurrentPrice, 1000);
 };
