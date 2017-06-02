@@ -29,6 +29,9 @@ function historyChart(elementId) {
                 dataLabels: {
                     enabled: false
                 },
+                marker: {
+                    enabled: false
+                },
                 enableMouseTracking: false
             }
         },
@@ -38,6 +41,9 @@ function historyChart(elementId) {
         }, {
             name: 'Actual',
             dataLabels: {
+                enabled: true
+            },
+            marker: {
                 enabled: true
             },
             data: []
