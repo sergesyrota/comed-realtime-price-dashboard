@@ -5,7 +5,8 @@ var url = 'data.php?currentPrice';
 var gaugeOptions = {
 
     chart: {
-        type: 'solidgauge'
+        type: 'solidgauge',
+        backgroundColor: 'transparent',
     },
 
     title: null,

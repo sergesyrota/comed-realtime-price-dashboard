@@ -7,6 +7,10 @@ function historyChart(elementId) {
         chart: {
             type: 'line'
         },
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+        },
         title: {
             text: 'Today\'s price and forecast'
         },
@@ -16,12 +20,14 @@ function historyChart(elementId) {
         yAxis: {
             title: {
                 text: 'Price per kWh in cents'
-            }
+            },
+            min: 5,
+            minRange: 10,
         },
         plotOptions: {
             line: {
                 dataLabels: {
-                    enabled: true
+                    enabled: false
                 },
                 enableMouseTracking: false
             }
@@ -31,6 +37,9 @@ function historyChart(elementId) {
             data: []
         }, {
             name: 'Actual',
+            dataLabels: {
+                enabled: true
+            },
             data: []
         }, {
             name: 'Old cost',
@@ -39,7 +48,6 @@ function historyChart(elementId) {
     });
     
     function updateDayAhead(data) {
-        console.log(data);
         if (chart) {
             chartSeries = chart.series[0];
             chartSeries.setData(data, true, false);
@@ -51,7 +59,6 @@ function historyChart(elementId) {
     setTimeout(getDayAhead, 1000);
     
     function updateToday(data) {
-        console.log(data);
         if (chart) {
             chartSeries = chart.series[1];
             chartSeries.setData(data, true, false);
@@ -64,7 +71,6 @@ function historyChart(elementId) {
     setTimeout(getToday, 1000);
     
     function updateOld(data) {
-        console.log(data);
         if (chart) {
             chartSeries = chart.series[2];
             chartSeries.setData(data, true, false);

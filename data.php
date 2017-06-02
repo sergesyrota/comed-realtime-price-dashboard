@@ -16,7 +16,7 @@ try {
 
 class ComedData {
     private $distributionCharge = 3.6;
-    private $capacityCharge = 2.83;
+    private $capacityCharge = 2.8;
 
     public function __construct()
     {}
@@ -47,7 +47,7 @@ class ComedData {
     }
 
     public function oldPrice() {
-        return 7.06 + $this->distributionCharge;
+        return 7.1 + $this->distributionCharge;
     }
 }
 
