@@ -16,7 +16,8 @@ try {
 
 class ComedData {
     private $distributionCharge = 3.6;
-    private $capacityCharge = 2.8;
+    private $transmissionCharge = 1.0;
+    private $capacityCharge = 1.6;
 
     public function __construct()
     {}
@@ -41,13 +42,13 @@ class ComedData {
         preg_match_all('%\[Date.UTC\(\d+,\d+,\d+,\d+,\d+,\d+\), (?P<price>[-\d\.]+)\]%', $text, $matches);
         $res = [];
         foreach ($matches['price'] as $price) {
-            $res[] = (float)$price + $this->distributionCharge + $this->capacityCharge;
+            $res[] = (float)$price + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
         }
         return $res;
     }
 
     public function oldPrice() {
-        return 7.1 + $this->distributionCharge;
+        return 7.1 + $this->transmissionCharge + $this->distributionCharge;
     }
 }
 

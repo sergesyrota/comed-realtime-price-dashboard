@@ -21,7 +21,7 @@ function historyChart(elementId) {
             title: {
                 text: 'Price per kWh in cents'
             },
-            min: 5,
+            min: 4,
             minRange: 10,
         },
         plotOptions: {
