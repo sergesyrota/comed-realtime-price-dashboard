@@ -2,6 +2,8 @@ function historyChart(elementId) {
     var dayAheadUrl = 'data.php?dayAheadToday';
     var todayUrl = 'data.php?todayHourly';
     var oldUrl = 'data.php?oldPrice';
+    var kwhUrl = 'data.php?consumedKwhToday';
+    var todaysConsumption = [];
 
     var chart = Highcharts.chart(elementId, {
         chart: {
@@ -17,13 +19,19 @@ function historyChart(elementId) {
         xAxis: {
             categories: ['12', '1','2','3','4','5','6','7','8','9','10','11','12','1','2','3','4','5','6','7','8','9','10','11']
         },
-        yAxis: {
+        yAxis: [{
             title: {
                 text: 'Price per kWh in cents'
             },
             min: 4,
             minRange: 10,
-        },
+        }, {
+            title: {
+                text: 'Price in $'
+            },
+            minRange: 1,
+            visible: false
+        }],
         plotOptions: {
             line: {
                 dataLabels: {
@@ -50,6 +58,14 @@ function historyChart(elementId) {
         }, {
             name: 'Old cost',
             data: []
+        }, {
+            name: 'Today',
+            yAxis: 1,
+            dataLabels: {
+                enabled: true,
+                format: '${point.y:,.2f}'
+            },
+            data: []
         }]
     });
     
@@ -66,6 +82,15 @@ function historyChart(elementId) {
     
     function updateToday(data) {
         if (chart) {
+            consumedCosts = [];
+            for (i=0; i<24; ++i) {
+                consumedCosts.push(data[i]*todaysConsumption[i]/100);
+            }
+            console.log(consumedCosts);
+            priceSeries = chart.series[3];
+            priceSeries.setData(consumedCosts, true, false);
+            
+            // cost data
             chartSeries = chart.series[1];
             chartSeries.setData(data, true, false);
         }
@@ -75,6 +100,15 @@ function historyChart(elementId) {
         $.get(todayUrl, function(data) {updateToday(JSON.parse(data));});
     }
     setTimeout(getToday, 1000);
+
+    function updateConsumed(data) {
+        todaysConsumption = data;
+        setTimeout(getConsumed, 600000);
+    }
+    function getConsumed() {
+        $.get(kwhUrl, function(data) {updateConsumed(JSON.parse(data));});
+    }
+    setTimeout(getConsumed, 1000);
     
     function updateOld(data) {
         if (chart) {

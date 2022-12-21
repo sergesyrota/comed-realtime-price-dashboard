@@ -98,4 +98,14 @@ function getCurrentPrice() {
   $.get(url, function(data) {updateCurrentPrice(parseFloat(data));});
 }
 setTimeout( getCurrentPrice, 1000);
+
+function updateMyAverage(data) {
+    console.log(data);
+    $('#my-price').html('Avg: ' + data['avg'].toFixed(1) + '&#162;<br>&nbsp;My: ' + data.myAvg.toFixed(1) + '&#162;');
+}
+function getMyAverage() {
+  $.get('data.php?myCostVsAvgCost', function(data) {updateMyAverage(JSON.parse(data));});
+}
+setTimeout( getMyAverage, 1200);
+
 };
