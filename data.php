@@ -3,7 +3,7 @@
 
 if (!empty($argv[1])) {
     $data = new ComedData();
-    var_dump($data->dayAheadToday());
+    var_dump($data->todayHourly());
 }
 
 $allowedFunctions = ['currentPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
@@ -38,10 +38,7 @@ class ComedData {
         $data = file_get_contents(
             'https://hourlypricing.comed.com/rrtp/ServletFeed?type=day&date='.date('Ymd')
         );
-        $dataTomorrow = file_get_contents(
-            'https://hourlypricing.comed.com/rrtp/ServletFeed?type=day&date='.date('Ymd', time() + 24*3600)
-        );
-        return $this->parseServletFeed($data, $dataTomorrow);
+        return $this->parseServletFeed($data); // Not really going to ever have last hour, as it's all live data, and then switched to tomorrow.
     }
 
     public function dayAheadToday() {
@@ -50,17 +47,19 @@ class ComedData {
         return $this->parseServletFeed($data, $dataTomorrow);
     }
 
-    private function parseServletFeed($textToday, $textTomorrow) {
+    private function parseServletFeed($textToday, $textTomorrow = null) {
         $regex = '%\[Date.UTC\(\d+,\d+,\d+,\d+,\d+,\d+\), (?P<price>[-\d\.]+)\]%';
         preg_match_all($regex, $textToday, $matchesToday);
-        preg_match_all($regex, $textTomorrow, $matchesTomorrow);
         $res = [];
         unset($matchesToday['price'][0]); // Discard first result, as it's for hour ending at midnight today
         foreach ($matchesToday['price'] as $price) {
             $res[] = (float)$price + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
         }
-        // Last hour of today is not shown today, but instead is in tomorrow's feed.
-        $res[] = (float)$matchesTomorrow['price'][0] + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+        if ($textTomorrow !== null) {
+            // Last hour of today is not shown today, but instead is in tomorrow's feed.
+            preg_match_all($regex, $textTomorrow, $matchesTomorrow);
+            $res[] = (float)$matchesTomorrow['price'][0] + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+        }
         return $res;
     }
 
