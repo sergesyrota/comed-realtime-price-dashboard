@@ -48,19 +48,27 @@ class ComedData {
     }
 
     private function parseServletFeed($textToday, $textTomorrow = null) {
-        $regex = '%\[Date.UTC\(\d+,\d+,\d+,\d+,\d+,\d+\), (?P<price>[-\d\.]+)\]%';
+        $regex = '%\[Date.UTC\(\d+,\d+,\d+,(?P<hour>\d+),\d+,\d+\), (?P<price>[-\d\.]+)\]%';
         preg_match_all($regex, $textToday, $matchesToday);
         $res = [];
         unset($matchesToday['price'][0]); // Discard first result, as it's for hour ending at midnight today
-        foreach ($matchesToday['price'] as $price) {
-            $res[] = (float)$price + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+        foreach ($matchesToday['price'] as $id=>$price) {
+            $res[$matchesToday['hour'][$id]] = (float)$price + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+        }
+        $resHourly = [];
+        for ($i=1; $i<24; $i++) {
+            $resHourly[] = (empty($res[$i]) ? null : $res[$i]);
+        }
+        for($i=23; $i>0; $i--) {
+            if ($resHourly[$i] !== null) break;
+            unset($resHourly[$i]);
         }
         if ($textTomorrow !== null) {
             // Last hour of today is not shown today, but instead is in tomorrow's feed.
             preg_match_all($regex, $textTomorrow, $matchesTomorrow);
             $res[] = (float)$matchesTomorrow['price'][0] + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
         }
-        return $res;
+        return $resHourly;
     }
 
     public function oldPrice() {

@@ -84,7 +84,11 @@ function historyChart(elementId) {
         if (chart) {
             consumedCosts = [];
             for (i=0; i<24; ++i) {
-                consumedCosts.push(data[i]*todaysConsumption[i]/100);
+                if (data[i] === null) {
+                    consumedCosts.push(null);
+                } else {
+                    consumedCosts.push(data[i]*todaysConsumption[i]/100);
+                }
             }
             console.log(consumedCosts);
             priceSeries = chart.series[3];
