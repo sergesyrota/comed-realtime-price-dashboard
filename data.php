@@ -7,7 +7,6 @@ if (!empty($argv[1])) {
     var_dump($data->dayAheadToday());
     // var_dump($data->todayHourly());
     // var_dump($data->get5MinutePrices());
-    var_dump($data->currentPredictedPrice());
     var_dump($data->currentPrice());
     die();
 }
@@ -44,7 +43,8 @@ class ComedData {
         $currentHour = (int)date('G');
         $dayAheadPrice = isset($dayAhead[$currentHour]) ? $dayAhead[$currentHour] : $this->currentPrice();
 
-        $predictedAvg = ($avgSoFar * $knownMinutes + $dayAheadPrice * $unknownMinutes) / 60;
+        // Giving double the weight to known minutes, so that we're more biased toward what we've seen already.
+        $predictedAvg = ($avgSoFar * $knownMinutes * 2 + $dayAheadPrice * $unknownMinutes) / (2 * $knownMinutes + $unknownMinutes);
         return round($predictedAvg,1); // other charges already included
     }
 
