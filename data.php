@@ -45,7 +45,7 @@ class ComedData {
         $dayAheadPrice = isset($dayAhead[$currentHour]) ? $dayAhead[$currentHour] : $this->currentPrice();
 
         $predictedAvg = ($avgSoFar * $knownMinutes + $dayAheadPrice * $unknownMinutes) / 60;
-        return $predictedAvg; // other charges already included
+        return round($predictedAvg,1); // other charges already included
     }
 
     public function todayHourly() {
