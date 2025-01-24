@@ -1,9 +1,15 @@
 <?php
 
+date_default_timezone_set('America/Chicago');
 
 if (!empty($argv[1])) {
     $data = new ComedData();
-    var_dump($data->todayHourly());
+    var_dump($data->dayAheadToday());
+    // var_dump($data->todayHourly());
+    // var_dump($data->get5MinutePrices());
+    var_dump($data->currentPredictedPrice());
+    var_dump($data->currentPrice());
+    die();
 }
 
 $allowedFunctions = ['currentPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
@@ -29,9 +35,17 @@ class ComedData {
     {}
 
     public function currentPrice() {
-        $data = json_decode(file_get_contents('https://hourlypricing.comed.com/api?type=currenthouraverage'));
-        $price = $data[0]->price + $this->distributionCharge + $this->capacityCharge;
-        return $price;
+        $fiveMinute = $this->get5MinutePrices();
+        $avgSoFar = $fiveMinute['averagePrice'];
+        $knownMinutes = $fiveMinute['knownMinutes'];
+        $unknownMinutes = 60 - $knownMinutes;
+
+        $dayAhead = $this->dayAheadToday();
+        $currentHour = (int)date('G');
+        $dayAheadPrice = isset($dayAhead[$currentHour]) ? $dayAhead[$currentHour] : $this->currentPrice();
+
+        $predictedAvg = ($avgSoFar * $knownMinutes + $dayAheadPrice * $unknownMinutes) / 60;
+        return $predictedAvg; // other charges already included
     }
 
     public function todayHourly() {
@@ -47,6 +61,27 @@ class ComedData {
         return $this->parseServletFeed($data, $dataTomorrow);
     }
 
+    public function get5MinutePrices() {
+        $startTs = date('YmdH01'); // This shows prices for the time *ending* in the specified timestamp
+        $endTs = date('YmdH59');
+        $url = 'https://hourlypricing.comed.com/api?type=5minutefeed&datestart=' . $startTs . '&dateend=' . $endTs;
+        $data = json_decode(file_get_contents($url), true);
+        
+        $totalPrice = 0;
+        
+        foreach ($data as $entry) {
+            $totalPrice += $entry['price'];
+        }
+        
+        $averagePrice = count($data) > 0 ? $totalPrice / count($data) : 0;
+        
+        return [
+            'averagePrice' => $averagePrice + $this->distributionCharge + $this->transmissionCharge + $this->capacityCharge,
+            'knownMinutes' => count($data)*5,
+            'data' => $data
+        ];
+    }
+
     private function parseServletFeed($textToday, $textTomorrow = null) {
         $regex = '%\[Date.UTC\(\d+,\d+,\d+,(?P<hour>\d+),\d+,\d+\), (?P<price>[-\d\.]+)\]%';
         preg_match_all($regex, $textToday, $matchesToday);
@@ -59,14 +94,16 @@ class ComedData {
         for ($i=1; $i<24; $i++) {
             $resHourly[] = (empty($res[$i]) ? null : $res[$i]);
         }
-        for($i=23; $i>0; $i--) {
+        // What is this doing?
+        for($i=22; $i>0; $i--) {
             if ($resHourly[$i] !== null) break;
             unset($resHourly[$i]);
         }
         if ($textTomorrow !== null) {
             // Last hour of today is not shown today, but instead is in tomorrow's feed.
             preg_match_all($regex, $textTomorrow, $matchesTomorrow);
-            $res[] = (float)$matchesTomorrow['price'][0] + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+            $resHourly[] = (float)$matchesTomorrow['price'][0] + $this->transmissionCharge + $this->distributionCharge + $this->capacityCharge;
+
         }
         return $resHourly;
     }
@@ -115,4 +152,3 @@ function throwError($code, $msg) {
     echo json_encode(['error' => $msg]);
     exit(1);
 }
-
