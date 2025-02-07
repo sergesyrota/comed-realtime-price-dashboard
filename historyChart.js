@@ -2,6 +2,7 @@ function historyChart(elementId) {
     var dayAheadUrl = 'data.php?dayAheadToday';
     var todayUrl = 'data.php?todayHourly';
     var oldUrl = 'data.php?oldPrice';
+    var freeSupplyUrl = 'data.php?freeSupplyPrice';
     var kwhUrl = 'data.php?consumedKwhToday';
     var todaysConsumption = [];
 
@@ -66,6 +67,20 @@ function historyChart(elementId) {
                 format: '${point.y:,.2f}'
             },
             data: []
+        }, {
+            name: 'Free Supply',
+            data: [],
+            type: 'area',
+            color: "#d3d3d3",
+            fillOpacity: 0.3,
+            dataLabels: {
+                enabled: false
+            },
+            marker: {
+                enabled: false
+            },
+            enableMouseTracking: false,
+            lineWidth: 0
         }]
     });
     
@@ -127,6 +142,21 @@ function historyChart(elementId) {
             arr.push(price);
         }
         updateOld(arr);
+    });
+    
+    function updateFree(data) {
+        if (chart) {
+            chartSeries = chart.series[4];
+            chartSeries.setData(data, true, false);
+        }
+    }
+    $.get(freeSupplyUrl, function(data) {
+        var price = parseFloat(data);
+        var arr = [];
+        for (i=0; i<24; i++) {
+            arr.push(price);
+        }
+        updateFree(arr);
     });
     
 }

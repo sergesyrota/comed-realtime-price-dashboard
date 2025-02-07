@@ -31,9 +31,9 @@ var gaugeOptions = {
     // the value axis
     yAxis: {
         stops: [
-            [0.3, '#55BF3B'], // green
-            [0.5, '#DDDF0D'], // yellow, 8c
-            [0.7, '#DF5353'] // red, 12c
+            [0.2, '#55BF3B'], // green
+            [0.45, '#DDDF0D'], // yellow, 
+            [0.7, '#DF5353'] // red
         ],
         lineWidth: 0,
         minorTickInterval: null,
@@ -61,7 +61,7 @@ var gaugeOptions = {
 var chartCurrent = Highcharts.chart(elementId, Highcharts.merge(gaugeOptions, {
     yAxis: {
         min: 0,
-        max: 20,
+        max: 23,
         title: {
             text: 'Current cost'
         }

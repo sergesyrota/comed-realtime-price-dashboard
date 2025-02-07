@@ -11,7 +11,7 @@ if (!empty($argv[1])) {
     die();
 }
 
-$allowedFunctions = ['currentPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
+$allowedFunctions = ['currentPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'freeSupplyPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
 
 $func = $_SERVER['QUERY_STRING'];
 if (!in_array($func, $allowedFunctions)) {
@@ -26,9 +26,9 @@ try {
 }
 
 class ComedData {
-    private $distributionCharge = 3.6;
+    private $distributionCharge = 6.2;
     private $transmissionCharge = 1.0;
-    private $capacityCharge = 1.6;
+    private $capacityCharge = 0; // Not relevant, as it's not per kWh; old: 0.3;
 
     public function __construct()
     {}
@@ -109,7 +109,11 @@ class ComedData {
     }
 
     public function oldPrice() {
-        return 7.1 + $this->transmissionCharge + $this->distributionCharge;
+        return 6 + $this->transmissionCharge + $this->distributionCharge;
+    }
+
+    public function freeSupplyPrice() {
+        return $this->transmissionCharge + $this->distributionCharge;
     }
     
     public function consumedKwhToday() {
