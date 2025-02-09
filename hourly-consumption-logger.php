@@ -4,13 +4,10 @@ date_default_timezone_set('UTC');
 
 function getConsumedKwh() {
     
-    $xml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_all_py-total-d.rrd:42:AVERAGE XPORT:data:Data -s -3days`;
+    $xml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_all_py-total-d.rrd:42:AVERAGE XPORT:data:Data -s -9days`; // 9 days max for hourly
     preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $xml, $matches);
     $data = [];
     foreach ($matches['tsEnd'] as $k=>$tsEnd) {
-        if (date('d') != date('d', $tsEnd-3600)) {
-            continue;
-        }
         $point = [
             'tsStart'   => $tsEnd-3600,
             'tsEnd'     => $tsEnd,
