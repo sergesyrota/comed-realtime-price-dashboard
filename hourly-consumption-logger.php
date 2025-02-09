@@ -1,0 +1,83 @@
+<?php
+
+date_default_timezone_set('UTC');
+
+function getConsumedKwh() {
+    
+    $xml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_all_py-total-d.rrd:42:AVERAGE XPORT:data:Data -s -3days`;
+    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $xml, $matches);
+    $data = [];
+    foreach ($matches['tsEnd'] as $k=>$tsEnd) {
+        if (date('d') != date('d', $tsEnd-3600)) {
+            continue;
+        }
+        $point = [
+            'tsStart'   => $tsEnd-3600,
+            'tsEnd'     => $tsEnd,
+            'humanTime'    => (new DateTime("@" . ($tsEnd-3600)))->setTimezone(new DateTimeZone('UTC'))->format('c'),
+            'chicagoTime'  => (new DateTime("@" . ($tsEnd-3600)))->setTimezone(new DateTimeZone('America/Chicago'))->format('c'),
+            'data'      => $matches['data'][$k],
+            'kWh'       => (float)$matches['data'][$k] * 3.5967048427
+        ];
+        $data[] = $point;
+    }
+    return $data;
+}
+
+// CLI script to update CSV (consumption.csv)
+$dataPoints = getConsumedKwh();
+
+// Define the CSV file location (placed in the same folder)
+$csvFile = __DIR__ . '/hourly-consumption-log.csv';
+$existingTsEnd = 0;
+
+// If the file exists, load it to determine the latest tsEnd so far.
+if (file_exists($csvFile)) {
+    if (($handle = fopen($csvFile, "r")) !== FALSE) {
+        // Read header
+        $header = fgetcsv($handle, 0, ",", "\"", "\\");
+        while (($row = fgetcsv($handle, 0, ",", "\"", "\\")) !== FALSE) {
+            // Assuming tsEnd is in the second column.
+            $tsEnd = (int)$row[1];
+            if ($tsEnd > $existingTsEnd) {
+                $existingTsEnd = $tsEnd;
+            }
+        }
+        fclose($handle);
+    }
+} else {
+    // Create a new CSV file with header
+    if (($handle = fopen($csvFile, "w")) !== FALSE) {
+        fputcsv($handle, ["tsStart", "tsEnd", "humanTime", "chicagoTime", "data", "kWh"], ",", "\"", "\\");
+        fclose($handle);
+    }
+}
+
+// Open the CSV file in append mode
+if (($handle = fopen($csvFile, "a")) !== FALSE) {
+    foreach ($dataPoints as $point) {
+        // Skip any rows already recorded (avoid duplicates)
+        if ($point['tsEnd'] <= $existingTsEnd) {
+            continue;
+        }
+        // Discard points less than 10 minutes after the hour-end.
+        if (time() < $point['tsEnd'] + 600) {
+            continue;
+        }
+        fputcsv(
+            $handle, 
+            [
+                $point['tsStart'], 
+                $point['tsEnd'], 
+                $point['humanTime'], 
+                $point['chicagoTime'], 
+                $point['data'], 
+                $point['kWh']
+            ],
+            ",",
+            "\"",
+            "\\"
+        );
+    }
+    fclose($handle);
+}
