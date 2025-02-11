@@ -4,17 +4,28 @@ date_default_timezone_set('UTC');
 
 function getConsumedKwh() {
     
+    // Total energy data
     $xml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_all_py-total-d.rrd:42:AVERAGE XPORT:data:Data -s -9days`; // 9 days max for hourly
     preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $xml, $matches);
+    
+    // Charger energy data
+    $chargeXml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_one_py-c01-d.rrd:42:AVERAGE XPORT:data:Data -s -9days`;
+    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $chargeXml, $chargeMatches);
+
     $data = [];
-    foreach ($matches['tsEnd'] as $k=>$tsEnd) {
+    foreach ($matches['tsEnd'] as $k => $tsEnd) {
         $point = [
-            'tsStart'   => $tsEnd-3600,
-            'tsEnd'     => $tsEnd,
-            'humanTime'    => (new DateTime("@" . ($tsEnd-3600)))->setTimezone(new DateTimeZone('UTC'))->format('c'),
-            'chicagoTime'  => (new DateTime("@" . ($tsEnd-3600)))->setTimezone(new DateTimeZone('America/Chicago'))->format('c'),
-            'data'      => $matches['data'][$k],
-            'kWh'       => (float)$matches['data'][$k] * 3.5967048427
+            'tsStart'      => $tsEnd - 3600,
+            'tsEnd'        => $tsEnd,
+            'humanTime'    => (new DateTime("@" . ($tsEnd - 3600)))
+                                ->setTimezone(new DateTimeZone('UTC'))
+                                ->format('c'),
+            'chicagoTime'  => (new DateTime("@" . ($tsEnd - 3600)))
+                                ->setTimezone(new DateTimeZone('America/Chicago'))
+                                ->format('c'),
+            'data'         => $matches['data'][$k],
+            'kWh'          => (float)$matches['data'][$k] * 3.5967048427,
+            'chargerkWh'   => (float)$chargeMatches['data'][$k] * 3.5967048427,
         ];
         $data[] = $point;
     }
