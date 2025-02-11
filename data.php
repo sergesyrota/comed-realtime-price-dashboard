@@ -11,7 +11,7 @@ if (!empty($argv[1])) {
     die();
 }
 
-$allowedFunctions = ['currentPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'freeSupplyPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
+$allowedFunctions = ['currentPrice', 'currentSupplyPrice', 'todayHourly', 'dayAheadToday', 'oldPrice', 'freeSupplyPrice', 'consumedKwhToday', 'myCostVsAvgCost'];
 
 $func = $_SERVER['QUERY_STRING'];
 if (!in_array($func, $allowedFunctions)) {
@@ -33,7 +33,7 @@ class ComedData {
     public function __construct()
     {}
 
-    public function currentPrice() {
+    public function currentPrice() { // includes all extra fees
         $fiveMinute = $this->get5MinutePrices();
         $avgSoFar = $fiveMinute['averagePrice'];
         $knownMinutes = $fiveMinute['knownMinutes'];
@@ -46,6 +46,11 @@ class ComedData {
         // Giving double the weight to known minutes, so that we're more biased toward what we've seen already.
         $predictedAvg = ($avgSoFar * $knownMinutes * 2 + $dayAheadPrice * $unknownMinutes) / (2 * $knownMinutes + $unknownMinutes);
         return round($predictedAvg,1); // other charges already included
+    }
+
+    public function currentSupplyPrice() {
+        $totalPrice = $this->currentPrice();
+        return round($totalPrice - $this->distributionCharge - $this->transmissionCharge - $this->capacityCharge,1); // other charges already included
     }
 
     public function todayHourly() {
