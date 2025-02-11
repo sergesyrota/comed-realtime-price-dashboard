@@ -6,11 +6,11 @@ function getConsumedKwh() {
     
     // Total energy data
     $xml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_all_py-total-d.rrd:42:AVERAGE XPORT:data:Data -s -9days`; // 9 days max for hourly
-    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $xml, $matches);
+    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+Na]+)<\/v><\/row>%', $xml, $matches);
     
     // Charger energy data
     $chargeXml = `rrdtool xport --step 3600 DEF:data=/var/lib/munin/local/srv1.local-energy_monitor_one_py-c01-d.rrd:42:AVERAGE XPORT:data:Data -s -9days`;
-    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+]+)<\/v><\/row>%', $chargeXml, $chargeMatches);
+    preg_match_all('%<row><t>(?P<tsEnd>[\d]+)<\/t><v>(?P<data>[\d\.e\-\+Na]+)<\/v><\/row>%', $chargeXml, $chargeMatches);
 
     $data = [];
     foreach ($matches['tsEnd'] as $k => $tsEnd) {
@@ -56,7 +56,7 @@ if (file_exists($csvFile)) {
 } else {
     // Create a new CSV file with header
     if (($handle = fopen($csvFile, "w")) !== FALSE) {
-        fputcsv($handle, ["tsStart", "tsEnd", "humanTime", "chicagoTime", "data", "kWh"], ",", "\"", "\\");
+        fputcsv($handle, ["tsStart", "tsEnd", "humanTime", "chicagoTime", "data", "kWh", "chargerkWh"], ",", "\"", "\\");
         fclose($handle);
     }
 }
@@ -80,7 +80,8 @@ if (($handle = fopen($csvFile, "a")) !== FALSE) {
                 $point['humanTime'], 
                 $point['chicagoTime'], 
                 $point['data'], 
-                $point['kWh']
+                $point['kWh'],
+                $point['chargerkWh']
             ],
             ",",
             "\"",
